@@ -93,6 +93,27 @@ router.post("/transferAsset/:id", auth, (req, res) => {
   });
 });
 
+router.get("/getTxns", auth, (req, res) => {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    let pid = "SELECT * FROM parties WHERE ??=?";
+    connection.query(pid, ["token", token], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err });
+      }
+      if (result != 0) {
+          let txns = "SELECT * FROM transaction WHERE ??=? OR ??=?";
+          connection.query(txns, ["Sender", result[0].PID, "Receiver", result[0].PID], (err, rows) => {
+              if(err) {
+                return res.status(500).send({ error: err});
+              }
+            return res.status(200).send({ success: true, Txns: rows});
+          });
+      } else {
+        return res.status(401).send({ success: false, message: "Unauthorized"});
+      }
+    });
+});
+
 function getPID(email) {
   return new Promise((resolve, reject) => {
     let query = "SELECT * FROM parties WHERE ??=?";
