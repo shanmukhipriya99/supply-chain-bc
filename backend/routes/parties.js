@@ -4,20 +4,23 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const uniqid = require("uniqid");
+const timestamp = require(timestamp);
 const router = new express.Router();
 
 router.post("/signup", async (req, res) => {
     var user = {
-        "PID": 
-        "name": req.body.name,
+        "PID": uniqid("P-"),
+        "PName": req.body.PName,
         "email": req.body.email,
-        "password": await bcrypt.hash(req.body.password, 10)
+        "password": await bcrypt.hash(req.body.password, 10),
+        "role": req.body.role,
+        "time": timestamp.now()
     }
     checkEmailExists(user.email).then((rows) => {
     if (rows.length === 0) {
       createAccount(user);
     }else {
-      res.send({'success': false, 'message': 'Email already registered!'});
+      res.status(409).send({'success': false, 'message': 'Email already registered!'});
     }
     })
     .catch((err) => {
@@ -26,7 +29,7 @@ router.post("/signup", async (req, res) => {
 
 
 function createAccount(info){
-    let query = "INSERT INTO users SET ?";
+    let query = "INSERT INTO parties SET ?";
       connection.query(query, info, (err, rows) => {
         if(err) {
          return res.status(500).json({ error: err });
@@ -49,9 +52,9 @@ router.post("/login", (req, res) => {
                 }
                 if(results) {
                 const token = jwt.sign({ email: result[0].email}, process.env.JWT, { expiresIn: "5h" });
-                connection.query("UPDATE users SET ??=? WHERE ??=?", ["tokens", token, "email", user.email], (err, row) => {
+                connection.query("UPDATE parties SET ??=? WHERE ??=?", ["token", token, "email", user.email], (err, row) => {
                     if(err) { throw err } else {
-                        res.send({	message: 'Login Successful, Token generated',	token: token,});
+                        res.status(200).send({	message: 'Login Successful, Token generated',	token: token,});
                     }
                 });
              } else{res.send("Password incorrect!!!!");}
@@ -65,7 +68,7 @@ router.post("/login", (req, res) => {
 
 function checkEmailExists(mail){
     return new Promise((resolve, reject) => {
-      let query = "SELECT * FROM users WHERE email = ?";
+      let query = "SELECT * FROM parties WHERE email = ?";
       connection.query(query, [mail], (err, row) => {
         if(err){
         //   reject(err) 

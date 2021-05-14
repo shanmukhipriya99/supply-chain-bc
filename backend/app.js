@@ -7,13 +7,13 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 //Importing routes
-const users = require("./routes/users");
+const parties = require("./routes/parties");
 const list = require("./routes/list");
 
 //Importing middleware
 app.use(cors());
 app.use(express.json());
-app.use(users);
+app.use(parties);
 app.use(list);
 
 //Listening...
