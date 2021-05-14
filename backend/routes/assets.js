@@ -22,7 +22,7 @@ router.post("/createAsset", auth, (req, res) => {
         time: timestamp.now(),
       };
       let createAsset = "INSERT INTO assets SET ?";
-      connection.query(createAsset, asset, (err, result) => {
+      connection.query(createAsset, asset, (err, row) => {
         if (err) {
           return res.status(500).json({ error: err });
         }
@@ -37,7 +37,73 @@ router.post("/createAsset", auth, (req, res) => {
 });
 
 router.get("/getAssets", auth, (req, res) => {
-    
+  const token = req.header("Authorization").replace("Bearer ", "");
+  let pid = "SELECT * FROM parties WHERE ??=?";
+  connection.query(pid, ["token", token], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    if (result != 0) {
+      let assets = "SELECT * FROM assets WHERE ??=?";
+      connection.query(assets, ["creator", result[0].PID], (err, rows) => {
+        if (err) {
+          return res.status(500).json({ error: err });
+        }
+        if (rows != 0) {
+          return res.status(200).send({ success: true, Assets: rows });
+        }
+      });
+    } else {
+      return res.status(401).send({ success: false, message: "Unauthorized" });
+    }
+  });
 });
+
+router.post("/transferAsset/:id", auth, (req, res) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  let pid = "SELECT * FROM parties WHERE ??=?";
+  connection.query(pid, ["token", token], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    if (result != 0) {
+      getPID(req.body.Receiver).then((row) => {
+        let txn = {
+          TID: uniqid("T-"),
+          AID: req.params.id,
+          Sender: result[0].PID,
+          Receiver: row[0].PID,
+          time: timestamp.now(),
+        };
+        // console.log(txn);
+        let addTxn = "INSERT INTO transaction SET ?";
+        connection.query(addTxn, txn, (err, rows) => {
+          if (err) {
+            return res.status(500).send({ error: err });
+          }
+          let transferAsset = "UPDATE assets SET ??=? WHERE ??=?";
+          connection.query(transferAsset, ["owner", row[0].PID, "AID", req.params.id], (err, transfer) => {
+            return res.status(200).send({ success: true, message: "Asset Transfered"});
+          });
+        });
+      });
+    } else {
+      return res.status(401).send({ success: false, message: "Unauthorized" });
+    }
+  });
+});
+
+function getPID(email) {
+  return new Promise((resolve, reject) => {
+    let query = "SELECT * FROM parties WHERE ??=?";
+    connection.query(query, ["email", email], (err, row) => {
+      if (err) {
+        //   reject(err)
+        throw new Error(err);
+      }
+      resolve(row);
+    });
+  });
+}
 
 module.exports = router;
