@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const uniqid = require("uniqid");
 const timestamp = require("unix-timestamp");
+const auth = require("../middleware/auth");
 const router = new express.Router();
 
 router.post("/signup", async (req, res) => {
@@ -77,5 +78,20 @@ function checkEmailExists(mail){
       });
     });
   };
+
+  router.get("/getPID", auth, (req, res) => {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    let pid = "SELECT * FROM parties WHERE ??=?";
+    connection.query(pid, ["token", token], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err });
+      }
+      if (result != 0) {
+        return res.status(200).send({ success: true, PID: result[0].PID});
+      } else {
+        return res.status(401).send({ success: false, message: "Unauthorized"});
+      }
+    });
+  });
 
 module.exports = router;
