@@ -4,7 +4,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const uniqid = require("uniqid");
-const timestamp = require("timestamp");
+const timestamp = require("unix-timestamp");
 const router = new express.Router();
 
 router.post("/signup", async (req, res) => {
