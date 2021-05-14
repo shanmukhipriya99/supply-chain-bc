@@ -87,7 +87,7 @@ function checkEmailExists(mail){
         return res.status(500).json({ error: err });
       }
       if (result != 0) {
-        return res.status(200).send({ success: true, PID: result[0].PID});
+        return res.status(200).send({ success: true, PID: result[0].PID, email: result[0].email});
       } else {
         return res.status(401).send({ success: false, message: "Unauthorized"});
       }
