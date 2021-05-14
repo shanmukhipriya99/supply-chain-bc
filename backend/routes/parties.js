@@ -94,4 +94,19 @@ function checkEmailExists(mail){
     });
   });
 
+  router.get("/getRole", auth, (req, res) => {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    let pid = "SELECT * FROM parties WHERE ??=?";
+    connection.query(pid, ["token", token], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err });
+      }
+      if (result != 0) {
+        return res.status(200).send({ success: true, role: result[0].role});
+      } else {
+        return res.status(401).send({ success: false, message: "Unauthorized"});
+      }
+    });
+  });
+
 module.exports = router;

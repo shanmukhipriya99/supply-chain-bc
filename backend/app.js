@@ -9,12 +9,14 @@ const port = process.env.PORT || 8080;
 //Importing routes
 const parties = require("./routes/parties");
 const list = require("./routes/list");
+const assets = require("./routes/assets");
 
 //Importing middleware
 app.use(cors());
 app.use(express.json());
 app.use(parties);
 app.use(list);
+app.use(assets);
 
 //Listening...
 app.listen(port, () => {
