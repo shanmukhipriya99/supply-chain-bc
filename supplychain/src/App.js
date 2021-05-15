@@ -16,6 +16,7 @@ const ButtonPage = React.lazy(() => import('pages/ButtonPage'));
 const CardPage = React.lazy(() => import('pages/CardPage'));
 const ChartPage = React.lazy(() => import('pages/ChartPage'));
 const DashboardPage = React.lazy(() => import('pages/DashboardPage'));
+const AddAsset = React.lazy(() => import('pages/addAsset'));
 const DropdownPage = React.lazy(() => import('pages/DropdownPage'));
 const FormPage = React.lazy(() => import('pages/FormPage'));
 const InputGroupPage = React.lazy(() => import('pages/InputGroupPage'));
@@ -56,7 +57,7 @@ class App extends React.Component {
               <React.Suspense fallback={<PageSpinner />}>
               
                 <Route exact path="/dashboard" component={DashboardPage} />
-                <Route exact path="/login-modal" component={AuthModalPage} />
+                <Route exact path="/addAsset" component={AddAsset} />
                 <Route exact path="/buttons" component={ButtonPage} />
                 <Route exact path="/cards" component={CardPage} />
                 <Route exact path="/widgets" component={WidgetPage} />
@@ -76,7 +77,7 @@ class App extends React.Component {
                 <Route exact path="/input-groups" component={InputGroupPage} />
                 <Route exact path="/charts" component={ChartPage} />
               </React.Suspense>
-              <Route path="*" component={() => "404 NOT FOUND"} />
+              
             </MainLayout>
             <Redirect to="/" />
           </Switch>
