@@ -55,10 +55,10 @@ router.post("/login", (req, res) => {
                 const token = jwt.sign({ email: result[0].email}, process.env.JWT, { expiresIn: "5h" });
                 connection.query("UPDATE parties SET ??=? WHERE ??=?", ["token", token, "email", user.email], (err, row) => {
                     if(err) { throw err } else {
-                        res.status(200).send({	message: 'Login Successful, Token generated',	token: token,});
+                        res.status(200).send({	success: 'true',	token: token,});
                     }
                 });
-             } else{res.send("Password incorrect!!!!");}
+             } else{res.send({ success: 'false'});}
             }); 
         }else {res.send("Login failed!!!!"); }
     })
