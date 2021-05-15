@@ -2,6 +2,7 @@ import logo200Image from 'assets/img/logo/logo_200.png';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
+import axios from '../axios';
 
 class AuthForm extends React.Component {
   get isLogin() {
@@ -20,6 +21,32 @@ class AuthForm extends React.Component {
 
   handleSubmit = event => {
     event.preventDefault();
+    if(this.isLogin) {
+      let login = {
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value
+      }
+      axios.post("/login", login).then(response => {
+        // console.log(response);
+        if(response.status === 200){
+          localStorage.setItem("token", response.data.token);
+          console.log(response);
+          // this.props.history.push("/dashboard");
+          // console.log(this.props.history);
+          window.location.href = '/dashboard';
+        } else {
+          alert("Incorrect credentials!");
+          // document.location.reload();
+        }
+      })
+      .catch(err => {
+        // console.log(err.response);
+       if (err.status === 500) {
+          alert("Server error, please try again later!");
+        }
+      });
+      // console.log(login);
+    }
   };
 
   renderButtonText() {
@@ -64,11 +91,11 @@ class AuthForm extends React.Component {
         )}
         <FormGroup>
           <Label for={usernameLabel}>{usernameLabel}</Label>
-          <Input {...usernameInputProps} />
+          <Input {...usernameInputProps} id="email" required />
         </FormGroup>
         <FormGroup>
           <Label for={passwordLabel}>{passwordLabel}</Label>
-          <Input {...passwordInputProps} />
+          <Input {...passwordInputProps} id="password" />
         </FormGroup>
         {this.isSignup && (
           <FormGroup>
