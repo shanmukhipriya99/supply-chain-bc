@@ -114,6 +114,27 @@ router.get("/getTxns", auth, (req, res) => {
     });
 });
 
+router.get("/trackAsset/:id", auth, (req, res) => {
+    const token = req.header("Authorization").replace("Bearer ", "");
+    let pid = "SELECT * FROM parties WHERE ??=?";
+    connection.query(pid, ["token", token], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: err });
+      }
+      if (result != 0) {
+          let assetTxns = "SELECT * FROM transaction WHERE ??=? ";
+          connection.query(assetTxns, ["AID", req.params.id], (err, rows) => {
+            if (err) {
+                return res.status(500).json({ error: err });
+              }                
+            return res.status(200).send({ success: true, AssetTxns: rows});
+          });
+      } else {
+        return res.status(401).send({ success: false, message: "Unauthorized"});
+      }
+    });
+});
+
 function getPID(email) {
   return new Promise((resolve, reject) => {
     let query = "SELECT * FROM parties WHERE ??=?";
