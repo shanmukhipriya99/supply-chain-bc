@@ -1,6 +1,7 @@
 import logo200Image from 'assets/img/logo/logo_200.png';
 import PropTypes from 'prop-types';
 import React from 'react';
+import {browserHistory} from 'react-router';
 import { Button, Form, FormGroup, Input, Label } from 'reactstrap';
 import axios from '../axios';
 
@@ -27,25 +28,46 @@ class AuthForm extends React.Component {
         password: document.getElementById("password").value
       }
       axios.post("/login", login).then(response => {
-        // console.log(response);
         if(response.status === 200){
           localStorage.setItem("token", response.data.token);
-          console.log(response);
+          // console.log(browserHistory);
           // this.props.history.push("/dashboard");
-          // console.log(this.props.history);
+          // console.log(window.location);
           window.location.href = '/dashboard';
-        } else {
-          alert("Incorrect credentials!");
-          // document.location.reload();
-        }
+        } 
       })
       .catch(err => {
-        // console.log(err.response);
-       if (err.status === 500) {
+        console.log(err.response);
+       if (err.response.status === 500) {
           alert("Server error, please try again later!");
+        } else if (err.response.status === 401) {
+          alert("Incorrect credentials!");
+          document.location.reload();
         }
       });
       // console.log(login);
+    }
+    if(this.isSignup) {
+      let signup = {
+        PName: document.getElementById("PName").value, 
+        email: document.getElementById("email").value,
+        password: document.getElementById("password").value,
+        role: document.getElementById("role").value
+      }
+      axios.post("/signup", signup).then(response => {
+          console.log(response);
+          // this.props.history.push("/");
+          // console.log(this.props.history);
+          window.location.href = '/';
+      })
+      .catch(err => {
+        console.log(err.response);
+       if (err.response.status === 500) {
+          alert("Server error, please try again later!");
+        } else if (err.response.status === 409) {
+          alert("Registration failed!");
+        }
+      });
     }
   };
 
@@ -89,6 +111,12 @@ class AuthForm extends React.Component {
             />
           </div>
         )}
+        {this.isSignup && (
+          <FormGroup>
+            <Label> Name</Label>
+            <Input id="PName" placeholder="Your Name" />
+          </FormGroup>
+        )}
         <FormGroup>
           <Label for={usernameLabel}>{usernameLabel}</Label>
           <Input {...usernameInputProps} id="email" required />
@@ -99,8 +127,14 @@ class AuthForm extends React.Component {
         </FormGroup>
         {this.isSignup && (
           <FormGroup>
-            <Label for={confirmPasswordLabel}>{confirmPasswordLabel}</Label>
-            <Input {...confirmPasswordInputProps} />
+            <Label>Occupation</Label>
+            <Input type="select" name="select" id="role">
+          <option>Farmer</option>
+          <option>WholeSaler</option>
+          <option>Distributor</option>
+          <option>Retailer</option>
+          <option>Customer</option>
+        </Input>
           </FormGroup>
         )}
         <FormGroup check>
