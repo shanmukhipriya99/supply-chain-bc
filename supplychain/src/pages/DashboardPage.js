@@ -12,11 +12,25 @@ class DashboardPage extends React.Component {
   componentDidMount() {
     axios.get('/getRole').then(response => {
       this.setState({ role: response.data.role });
+    }).catch(err => {
+      if (err.response.status === 500) {
+        alert("Server error, please try again later!");
+      } else if (err.response.status === 401) {
+        alert("Unauthorized!");
+        this.props.history.push("/");
+      }
     });
     axios.get("/getAssets").then(response => {
       // console.log(response.data.Assets);
       this.setState({ assetList: response.data.Assets})
-    })
+    }).catch(err => {
+      if (err.response.status === 500) {
+        alert("Server error, please try again later!");
+      } else if (err.response.status === 401) {
+        alert("Unauthorized!");
+        this.props.history.push("/");
+      }
+    });
   }
 
   submitHandler = () => {

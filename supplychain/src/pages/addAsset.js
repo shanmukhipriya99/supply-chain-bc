@@ -27,6 +27,7 @@ class AddAsset extends Component {
         .catch(err => {
             if (err.response.status === 401) {
                 alert("Unauthorized!");
+                this.props.history.push("/");
             }
         });
     }
@@ -43,7 +44,14 @@ class AddAsset extends Component {
                 alert("Asset Created!");
                 this.props.history.push("/dashboard");
             }
-        })
+        }).catch(err => {
+          if (err.response.status === 500) {
+            alert("Server error, please try again later!");
+          } else if (err.response.status === 401) {
+            alert("Unauthorized!");
+            this.props.history.push("/");
+          }
+        });
     }
 
     render() {
