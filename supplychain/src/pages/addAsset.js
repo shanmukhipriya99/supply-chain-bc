@@ -18,6 +18,16 @@ import axios from '../axios';
 
 class AddAsset extends Component {
 
+  state = {
+    aid: ''
+  }
+
+  componentDidMount() {
+    axios.get("/getAID").then(response => {
+      console.log(response.data.id);
+      this.setState({ aid: response.data.id});
+    })
+  }
     
 
     submitHandler = () => {
