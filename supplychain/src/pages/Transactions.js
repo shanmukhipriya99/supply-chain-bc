@@ -53,7 +53,7 @@ class Transactions extends Component {
               // console.log(this.state.senders[i],  localStorage.getItem("email"));
       }
     } else {
-      message = <Typography type="display-4">No assets created or owned!</Typography>;
+      message = <Typography type="display-4">No Transactions!</Typography>;
     }
     return (
       <Page
