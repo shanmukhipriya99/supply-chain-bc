@@ -156,15 +156,13 @@ router.get("/getTxns", auth, (req, res) => {
             }
           }
           // console.log("S"+sender+" R"+receiver+" A"+assetName+" T"+time );
-          return res
-            .status(200)
-            .send({
-              success: true,
-              Senders: sender,
-              Receivers: receiver,
-              ANames: assetName,
-              Time: time,
-            });
+          return res.status(200).send({
+            success: true,
+            Senders: sender,
+            Receivers: receiver,
+            ANames: assetName,
+            Time: time,
+          });
         })
         .catch((err) => {
           return res.status(500).json({ error: err });
@@ -178,18 +176,49 @@ router.get("/getTxns", auth, (req, res) => {
 router.get("/trackAsset/:id", auth, (req, res) => {
   const token = req.header("Authorization").replace("Bearer ", "");
   let pid = "SELECT * FROM parties WHERE ??=?";
+  let sender = [];
+  let receiver = [];
+  let assetName = [];
+  let time = [];
   connection.query(pid, ["token", token], (err, result) => {
     if (err) {
       return res.status(500).json({ error: err });
     }
     if (result != 0) {
-      let assetTxns = "SELECT * FROM transaction WHERE ??=? ";
-      connection.query(assetTxns, ["AID", req.params.id], (err, rows) => {
-        if (err) {
-          return res.status(500).json({ error: err });
+      getAssetTxns(req.params.id).then(async (result) => {
+        // console.log(result);
+        if (result.length != 0) {
+          for (let i = 0; i < result.length; i++) {
+            time.push(result[i].time);
+            await getDetails(
+              req.params.id,
+              result[i].Sender,
+              result[i].Receiver
+            ).then(async (party) => {
+              sender.push(party.sender);
+              receiver.push(party.receiver);
+              // console.log("S"+ sender + "R" + receiver);
+              await getAName(req.params.id).then((aname) => {
+                assetName.push(aname);
+                // console.log(assetName);
+              });
+            });
+          }
         }
-        return res.status(200).send({ success: true, AssetTxns: rows });
+        // console.log("S"+sender+" R"+receiver+" A"+assetName );
+      return res.status(200).send({
+        success: true,
+        Senders: sender,
+        Receivers: receiver,
+        ANames: assetName,
+        Time: time,
       });
+    })
+    .catch((err) => {
+      return res.status(500).json({ error: err });
+    });
+
+      // return res.status(200).send({ success: true, AssetTxns: rows });
     } else {
       return res.status(401).send({ success: false, message: "Unauthorized" });
     }
@@ -264,6 +293,19 @@ function getAName(aid) {
       // console.log("Row" + rows[0]);
       // party.AName = rows[0].AID;
       resolve(rows[0].AName);
+    });
+  });
+}
+
+function getAssetTxns(aid) {
+  return new Promise((resolve, reject) => {
+    let txns = "SELECT * FROM transaction WHERE ??=?";
+    connection.query(txns, ["AID", aid], (err, row) => {
+      if (err) {
+        //   reject(err)
+        throw new Error(err);
+      }
+      resolve(row);
     });
   });
 }
