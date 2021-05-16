@@ -61,7 +61,7 @@ class TrackAsset extends Component {
         <Row>
           <Col>
             <Card className="mb-3">
-              <CardHeader>Responsive</CardHeader>
+              <CardHeader>Asset Transfers</CardHeader>
               <CardBody>
               {message}
                 <Table responsive striped>

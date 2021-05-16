@@ -64,7 +64,7 @@ class Transactions extends Component {
         <Row>
           <Col>
             <Card className="mb-3">
-              <CardHeader>Responsive</CardHeader>
+              <CardHeader>Previous Transactions</CardHeader>
               <CardBody>
               {message}
                 <Table responsive>
