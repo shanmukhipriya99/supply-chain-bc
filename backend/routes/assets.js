@@ -4,6 +4,7 @@ const express = require("express");
 const uniqid = require("uniqid");
 const timestamp = require("unix-timestamp");
 const auth = require("../middleware/auth");
+const { response } = require("express");
 const router = new express.Router();
 
 router.post("/createAsset", auth, (req, res) => {
@@ -95,18 +96,38 @@ router.post("/transferAsset/:id", auth, (req, res) => {
 
 router.get("/getTxns", auth, (req, res) => {
     const token = req.header("Authorization").replace("Bearer ", "");
+    let sender= [];
+    let receiver= [];
+    let assetName=[];
+    let time=[];
     let pid = "SELECT * FROM parties WHERE ??=?";
     connection.query(pid, ["token", token], (err, result) => {
       if (err) {
         return res.status(500).json({ error: err });
       }
-      if (result != 0) {
-          let txns = "SELECT * FROM transaction WHERE ??=? OR ??=?";
-          connection.query(txns, ["Sender", result[0].PID, "Receiver", result[0].PID], (err, rows) => {
-              if(err) {
-                return res.status(500).send({ error: err});
+      if (result != 0) {  //sender, receiver
+          getTxns(result[0].PID, result[0].PID).then(async transactions => {
+            let txn = 0;
+              if(transactions.length !=0){
+                for(let i=0; i<transactions.length; i++) {
+                  time.push(transactions[i].time);
+                await getDetails(transactions[i].AID, transactions[i].Sender, transactions[i].Receiver).then(async (party) => {
+                      sender.push(party.sender);
+                      receiver.push(party.receiver);
+                      // console.log("S"+ sender + "R" + receiver);
+                      await getAName(transactions[i].AID).then(aname => {
+                        assetName.push(aname);
+                        // console.log(assetName);
+                      })
+                      // console.log("S"+sender+" R"+receiver+" A"+assetName );
+                  })
+                  txn++;
+                }
               }
-            return res.status(200).send({ success: true, Txns: rows});
+              // console.log("S"+sender+" R"+receiver+" A"+assetName+" T"+time );
+            return res.status(200).send({ success: true, Senders: sender, Receivers: receiver, ANames: assetName, Time: time});
+          }).catch((err) => {
+            return res.status(500).json({ error: err });
           });
       } else {
         return res.status(401).send({ success: false, message: "Unauthorized"});
@@ -145,6 +166,63 @@ function getPID(email) {
       }
       resolve(row);
     });
+  });
+}
+
+function getTxns(sender, receiver) {
+  return new Promise((resolve, reject) => {
+    let txns = "SELECT * FROM transaction WHERE ??=? OR ??=?";
+    connection.query(txns, ["Sender", sender, "Receiver", receiver], (err, row) => {
+      if (err) {
+        //   reject(err)
+        throw new Error(err);
+      }
+      resolve(row);
+    });
+  });
+}
+
+function getDetails(aid, sender, receiver) {
+  let party = {
+    sender: null,
+    receiver: null,
+    AName: null
+  }
+  return new Promise((resolve, reject) => {
+    let query = "SELECT email FROM parties WHERE ??=?";
+    connection.query(query, ["PID", sender], (err, row) => {
+      if (err) {
+        //   reject(err)
+        throw new Error(err);
+      }
+      party.sender = row[0].email;
+      // console.log(party);
+      // resolve(party);
+    });
+    connection.query(query, ["PID", receiver], (err, row) => {
+      if (err) {
+        throw new Error(err);
+      }
+      // console.log("Row" + row);
+      party.receiver = row[0].email;
+      resolve(party);
+    });
+    
+  });
+}
+
+function getAName(aid) {
+  return new Promise(function (resolve, reject) {
+    let aname = "SELECT AName FROM assets WHERE ??=?";
+    connection.query(aname, ["AID", aid], (err, rows) => {
+      if (err) {
+        throw new Error(err);
+      }
+      // console.log("Row" + rows[0]);
+      // party.AName = rows[0].AID;
+      resolve(rows[0].AName);
+    });
+    
   });
 }
 
