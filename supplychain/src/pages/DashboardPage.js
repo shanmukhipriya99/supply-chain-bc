@@ -66,7 +66,8 @@ class DashboardPage extends React.Component {
         let date = new Date(asset.time*1000).toLocaleDateString("en-US");
         let owner = asset.owner;
         let creator = asset.creator;
-        let transfer = '';
+        let transfer = 'Cannot transfer!';
+        let url = "/trackAsset/"+asset.AID;
         if(owner === creator) {
           transfer = (<td>
             <a href={url.concat(asset.AID)}>Transfer</a> 
@@ -76,7 +77,7 @@ class DashboardPage extends React.Component {
           <tbody key={index}>
                     <tr>
                       <th scope="row">{index+1}</th>
-                      <td>{asset.AName}</td>
+                      <td><a href={url}>{asset.AName}</a></td>
                       <td>{asset.creator}</td>
                       <td>{asset.owner}</td>
                       <td>{date}</td>
