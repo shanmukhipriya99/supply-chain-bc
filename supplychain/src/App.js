@@ -18,11 +18,11 @@ const ChartPage = React.lazy(() => import('pages/ChartPage'));
 const DashboardPage = React.lazy(() => import('pages/DashboardPage'));
 const AddAsset = React.lazy(() => import('pages/addAsset'));
 const AddTxn = React.lazy(() => import('pages/addTxn'));
-const DropdownPage = React.lazy(() => import('pages/DropdownPage'));
+const CustDashboard = React.lazy(() => import('pages/CustDashboard'));
 const FormPage = React.lazy(() => import('pages/FormPage'));
 const InputGroupPage = React.lazy(() => import('pages/InputGroupPage'));
 const ModalPage = React.lazy(() => import('pages/ModalPage'));
-const ProgressPage = React.lazy(() => import('pages/ProgressPage'));
+const CustAssets = React.lazy(() => import('pages/CustAssets'));
 const Transactions = React.lazy(() => import('pages/Transactions'));
 const TrackAsset = React.lazy(() => import('pages/TrackAsset'));
 const TypographyPage = React.lazy(() => import('pages/TypographyPage'));
@@ -74,8 +74,8 @@ class App extends React.Component {
                   path="/button-groups"
                   component={ButtonGroupPage}
                 />
-                <Route exact path="/dropdowns" component={DropdownPage} />
-                <Route exact path="/progress" component={ProgressPage} />
+                <Route exact path="/dropdowns" component={CustDashboard} />
+                <Route exact path="/progress" component={CustAssets} />
                 <Route exact path="/modals" component={ModalPage} />
                 <Route exact path="/forms" component={FormPage} />
                 <Route exact path="/input-groups" component={InputGroupPage} />
