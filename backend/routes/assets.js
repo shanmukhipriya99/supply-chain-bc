@@ -22,7 +22,7 @@ router.post("/createAsset", auth, (req, res) => {
     }
     if (result != 0) {
       let asset = {
-        AID: uniqid("A-"),
+        AID: req.body.AID,
         AName: req.body.AName,
         creator: result[0].PID,
         owner: result[0].PID,
@@ -51,10 +51,10 @@ router.get("/getAssets", auth, (req, res) => {
       return res.status(500).json({ error: err });
     }
     if (result != 0) {
-      let assets = "SELECT * FROM assets WHERE ??=?";
+      let assets = "SELECT * FROM assets WHERE ??=? OR ??=?";
       let creators = [];
       let owners = [];
-      connection.query(assets, ["creator", result[0].PID], async (err, rows) => {
+      connection.query(assets, ["creator", result[0].PID, "owner", result[0].PID], async (err, rows) => {
         if (err) {
           return res.status(500).json({ error: err });
         }
@@ -236,6 +236,38 @@ router.get("/trackAsset/:id", auth, (req, res) => {
     }
   });
 });
+
+router.get("/allAssets", auth, (req, res) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  let pid = "SELECT * FROM parties WHERE ??=?";
+  connection.query(pid, ["token", token], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    if (result != 0) {
+      let assets = "SELECT * FROM assets";
+      let creators = [];
+      let owners = [];
+      connection.query(assets, async (err, rows) => {
+        if (err) {
+          return res.status(500).json({ error: err });
+        }
+        if (rows != 0) {
+          for(let i=0; i<rows.length; i++){
+            await getDetails(rows[i].creator, rows[i].owner).then(result => {
+              creators.push(result.sender);
+              owners.push(result.receiver);
+            })
+          }
+          return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
+        }
+      });
+    } else {
+      return res.status(401).send({ success: false, message: "Unauthorized" });
+    }
+  });
+});
+
 
 function getPID(email) {
   return new Promise((resolve, reject) => {
