@@ -24,6 +24,7 @@ const InputGroupPage = React.lazy(() => import('pages/InputGroupPage'));
 const ModalPage = React.lazy(() => import('pages/ModalPage'));
 const ProgressPage = React.lazy(() => import('pages/ProgressPage'));
 const Transactions = React.lazy(() => import('pages/Transactions'));
+const TrackAsset = React.lazy(() => import('pages/TrackAsset'));
 const TypographyPage = React.lazy(() => import('pages/TypographyPage'));
 const WidgetPage = React.lazy(() => import('pages/WidgetPage'));
 
@@ -66,6 +67,7 @@ class App extends React.Component {
                 <Route exact path="/typography" component={TypographyPage} />
                 <Route exact path="/alerts" component={AlertPage} />
                 <Route exact path="/txns" component={Transactions} />
+                <Route exact path="/trackAsset/:id" component={TrackAsset} />
                 <Route exact path="/badges" component={BadgePage} />
                 <Route
                   exact
