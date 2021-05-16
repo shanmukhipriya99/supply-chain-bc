@@ -32,6 +32,7 @@ class AddAsset extends Component {
 
     submitHandler = () => {
         let asset = {
+            AID: this.state.aid,
             AName: document.getElementById("AName").value,
             creator: localStorage.getItem("PID"),
             owner: localStorage.getItem("PID"),
