@@ -153,7 +153,6 @@ router.get("/getTxns", auth, (req, res) => {
             for (let i = 0; i < transactions.length; i++) {
               time.push(transactions[i].time);
               await getDetails(
-                transactions[i].AID,
                 transactions[i].Sender,
                 transactions[i].Receiver
               ).then(async (party) => {
@@ -205,7 +204,6 @@ router.get("/trackAsset/:id", auth, (req, res) => {
           for (let i = 0; i < result.length; i++) {
             time.push(result[i].time);
             await getDetails(
-              req.params.id,
               result[i].Sender,
               result[i].Receiver
             ).then(async (party) => {
@@ -285,12 +283,12 @@ function getDetails(sender, receiver) {
       // console.log(party);
       // resolve(party);
     });
-    connection.query(query, ["PID", receiver], (err, row) => {
+    connection.query(query, ["PID", receiver], (err, rows) => {
       if (err) {
         throw new Error(err);
       }
-      // console.log("Row" + row);
-      party.receiver = row[0].email;
+      // console.log("Row" + rows);
+      party.receiver = rows[0].email;
       resolve(party);
     });
   });
