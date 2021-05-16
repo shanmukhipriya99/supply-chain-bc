@@ -1,344 +1,114 @@
+import axios from '../axios';
 import Page from 'components/Page';
-import React from 'react';
+import React, {Component} from 'react';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
+import Typography from 'components/Typography';
 
 const tableTypes = ['', 'bordered', 'striped', 'hover'];
 
-const TablePage = () => {
-  return (
-    <Page
-      title="Tables"
-      breadcrumbs={[{ name: 'tables', active: true }]}
-      className="TablePage"
-    >
-      {tableTypes.map((tableType, index) => (
-        <Row key={index}>
+class Transactions extends Component {
+
+  state = {
+    assetNames: [],
+    senders: [],
+    receivers: [],
+    time: [],
+  }
+
+  componentDidMount() {
+    axios.get("/getTxns").then(response => {
+      console.log(response.data);
+      this.setState({ assetNames: response.data.ANames, senders: response.data.Senders, receivers: response.data.Receivers, time: response.data.Time});
+    }).catch(err => {
+      if (err.response.status === 500) {
+        alert("Server error, please try again later!");
+      } else if (err.response.status === 401) {
+        alert("Unauthorized!");
+        this.props.history.push("/");
+      }
+    });
+  }
+
+
+  render() {
+    let txns = <Typography type="display-4">No assets created or owned!</Typography>;
+    let transactions = [];
+    let cName = "table-success";
+    if(this.state.assetNames.length != 0) {
+      for(let i=0; i<this.state.assetNames.length; i++){
+        let date = new Date(this.state.time[i]*1000).toLocaleDateString("en-US");
+        if(this.state.senders[i] === localStorage.getItem("email")) {
+          cName = "table-danger";
+        }
+        txns =  (
+                <tbody key={i}>
+                          <tr className={cName}>
+                            <th scope="row">{i+1}</th>
+                            <td>{this.state.assetNames[i]}</td>
+                            <td>{this.state.senders[i]}</td>
+                            <td>{this.state.receivers[i]}</td>
+                            <td>{date}</td>
+                          </tr>
+                        </tbody>
+              )
+              transactions.push(txns);
+              console.log(this.state.senders[i],  localStorage.getItem("email"));
+      }
+    }
+    return (
+      <Page
+        title="Transactions"
+        breadcrumbs={[{ name: 'transactions', active: true }]}
+        className="Transactions"
+      >
+        <Row>
           <Col>
             <Card className="mb-3">
-              <CardHeader>{tableType || 'default'}</CardHeader>
+              <CardHeader>Responsive</CardHeader>
               <CardBody>
-                <Row>
-                  <Col>
-                    <Card body>
-                      <Table {...{ [tableType || 'default']: true }}>
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                          </tr>
-                          <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                          </tr>
-                          <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Card>
-                  </Col>
-
-                  <Col>
-                    <Card body>
-                      <Table dark>
-                        <thead>
-                          <tr>
-                            <th>#</th>
-                            <th>First Name</th>
-                            <th>Last Name</th>
-                            <th>Username</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <th scope="row">1</th>
-                            <td>Mark</td>
-                            <td>Otto</td>
-                            <td>@mdo</td>
-                          </tr>
-                          <tr>
-                            <th scope="row">2</th>
-                            <td>Jacob</td>
-                            <td>Thornton</td>
-                            <td>@fat</td>
-                          </tr>
-                          <tr>
-                            <th scope="row">3</th>
-                            <td>Larry</td>
-                            <td>the Bird</td>
-                            <td>@twitter</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                    </Card>
-                  </Col>
-                </Row>
+                <Table responsive>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Asset ID</th>
+                      <th>Sender</th>
+                      <th>Receiver</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  {transactions}
+                </Table>
+                <p>Total Transactions: {this.state.assetNames.length}</p>
               </CardBody>
             </Card>
           </Col>
         </Row>
-      ))}
-
-      <Row>
-        <Col>
-          <Card className="mb-3">
-            <CardHeader>Contextual</CardHeader>
-            <CardBody>
-              <Table>
-                <thead>
-                  <tr>
-                    <th scope="col">Type</th>
-                    <th scope="col">Column heading</th>
-                    <th scope="col">Column heading</th>
-                    <th scope="col">Column heading</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="table-active">
-                    <th scope="row">Active</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Default</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-
-                  <tr className="table-primary">
-                    <th scope="row">Primary</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-secondary">
-                    <th scope="row">Secondary</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-success">
-                    <th scope="row">Success</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-danger">
-                    <th scope="row">Danger</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-warning">
-                    <th scope="row">Warning</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-info">
-                    <th scope="row">Info</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-light">
-                    <th scope="row">Light</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-dark">
-                    <th scope="row">Dark</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </CardBody>
-          </Card>
-        </Col>
-
-        <Col>
-          <Card className="mb-3">
-            <CardHeader>Contextual</CardHeader>
-            <CardBody>
-              <Table dark>
-                <thead>
-                  <tr>
-                    <th scope="col">Type</th>
-                    <th scope="col">Column heading</th>
-                    <th scope="col">Column heading</th>
-                    <th scope="col">Column heading</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="table-active">
-                    <th scope="row">Active</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">Default</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-
-                  <tr className="table-primary">
-                    <th scope="row">Primary</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-secondary">
-                    <th scope="row">Secondary</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-success">
-                    <th scope="row">Success</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-danger">
-                    <th scope="row">Danger</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-warning">
-                    <th scope="row">Warning</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-info">
-                    <th scope="row">Info</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-light">
-                    <th scope="row">Light</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                  <tr className="table-dark">
-                    <th scope="row">Dark</th>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                    <td>Column content</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-          <Card className="mb-3">
-            <CardHeader>Responsive</CardHeader>
-            <CardBody>
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-          <Card className="mb-3">
-            <CardHeader>Size</CardHeader>
-            <CardBody>
-              <Table size="sm">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Username</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">1</th>
-                    <td>Mark</td>
-                    <td>Otto</td>
-                    <td>@mdo</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">2</th>
-                    <td>Jacob</td>
-                    <td>Thornton</td>
-                    <td>@fat</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">3</th>
-                    <td>Larry</td>
-                    <td>the Bird</td>
-                    <td>@twitter</td>
-                  </tr>
-                </tbody>
-              </Table>
-            </CardBody>
-          </Card>
-        </Col>
-      </Row>
-    </Page>
-  );
+        
+      </Page>
+    );
+  }
+  
 };
 
-export default TablePage;
+export default Transactions;
+
+
+
+ //   txns = this.state.txns.map((txn, index) => {
+    //     let cName = "table-success";
+    //     if(txn.Sender === localStorage.getItem("PID")) {
+    //       cName = "table-danger";
+    //     }
+    // let date = new Date(txn.time*1000).toLocaleDateString("en-US");
+    //     return (
+    //       <tbody key={index}>
+    //                 <tr className={cName}>
+    //                   <th scope="row">{index+1}</th>
+    //                   <td>{txn.AID}</td>
+    //                   <td>{txn.Sender}</td>
+    //                   <td>{txn.Receiver}</td>
+    //                   <td>{date}</td>
+    //                 </tr>
+    //               </tbody>
+    //     )
+    //   });

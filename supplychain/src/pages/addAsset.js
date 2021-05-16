@@ -18,19 +18,7 @@ import axios from '../axios';
 
 class AddAsset extends Component {
 
-    componentDidMount() {
-        axios.get("/getPID").then(response => {
-            console.log(response);
-            localStorage.setItem("PID", response.data.PID);
-            localStorage.setItem("email", response.data.email);
-        })
-        .catch(err => {
-            if (err.response.status === 401) {
-                alert("Unauthorized!");
-                this.props.history.push("/");
-            }
-        });
-    }
+    
 
     submitHandler = () => {
         let asset = {

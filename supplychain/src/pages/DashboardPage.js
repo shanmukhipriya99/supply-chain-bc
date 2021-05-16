@@ -10,6 +10,17 @@ class DashboardPage extends React.Component {
   };
 
   componentDidMount() {
+    axios.get("/getPID").then(response => {
+      console.log(response);
+      localStorage.setItem("PID", response.data.PID);
+      localStorage.setItem("email", response.data.email);
+  })
+  .catch(err => {
+      if (err.response.status === 401) {
+          alert("Unauthorized!");
+          this.props.history.push("/");
+      }
+  });
     axios.get('/getRole').then(response => {
       this.setState({ role: response.data.role });
     }).catch(err => {
@@ -50,8 +61,9 @@ class DashboardPage extends React.Component {
       </Button>
     </Card>);
     }
-    if(this.state.assetList != null) {
+    if(this.state.assetList.length != 0) {
       assets = this.state.assetList.map((asset, index) => {
+        let date = new Date(asset.time*1000).toLocaleDateString("en-US");
         let owner = asset.owner;
         let creator = asset.creator;
         let transfer = '';
@@ -67,7 +79,7 @@ class DashboardPage extends React.Component {
                       <td>{asset.AName}</td>
                       <td>{asset.creator}</td>
                       <td>{asset.owner}</td>
-                      <td>{asset.time}</td>
+                      <td>{date}</td>
                       {transfer}
                     </tr>
                   </tbody>
@@ -100,7 +112,7 @@ class DashboardPage extends React.Component {
             <th>Asset Name</th>
             <th>Creator Name</th>
             <th>Owner Name</th>
-            <th>Time</th>
+            <th>Date</th>
             <th>Action</th>
           </tr>
         </thead>
