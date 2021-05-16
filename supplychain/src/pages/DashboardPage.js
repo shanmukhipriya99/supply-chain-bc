@@ -6,7 +6,9 @@ import Typography from 'components/Typography';
 class DashboardPage extends React.Component {
   state = {
     role: null,
-    assetList: []
+    assetList: [],
+    creators: [],
+    owners: []
   };
 
   componentDidMount() {
@@ -33,7 +35,7 @@ class DashboardPage extends React.Component {
     });
     axios.get("/getAssets").then(response => {
       // console.log(response.data.Assets);
-      this.setState({ assetList: response.data.Assets})
+      this.setState({ assetList: response.data.Assets, creators: response.data.creators, owners: response.data.owners})
     }).catch(err => {
       if (err.response.status === 500) {
         alert("Server error, please try again later!");
@@ -50,8 +52,9 @@ class DashboardPage extends React.Component {
 
   render() {
     let card = null;
+    let assets = [];
+    let message = '';
     let url="/transferAsset/";
-    let assets = <Typography type="display-4">No assets created or owned!</Typography>
     if(this.state.role === "Farmer") {
       card = (<Card body inverse color="secondary">
       <CardTitle tag="h5">Add an Asset</CardTitle>
@@ -62,30 +65,33 @@ class DashboardPage extends React.Component {
     </Card>);
     }
     if(this.state.assetList.length != 0) {
-      assets = this.state.assetList.map((asset, index) => {
-        let date = new Date(asset.time*1000).toLocaleDateString("en-US");
-        let owner = asset.owner;
-        let creator = asset.creator;
-        let transfer = 'Cannot transfer!';
-        let url = "/trackAsset/"+asset.AID;
+      let transfer = 'Cannot transfer!';
+      let asts = '';
+      for(let i=0; i<this.state.assetList.length; i++) {
+        let date = new Date(this.state.assetList[i].time*1000).toLocaleDateString("en-US");
+        let owner = this.state.owners[i];
+        let creator = this.state.creators[i];
+        let url = "/transferAsset/"+this.state.assetList[i].AID;
         if(owner === creator) {
           transfer = (<td>
-            <a href={url.concat(asset.AID)}>Transfer</a> 
+            <a href={url}>Transfer</a> 
           </td>);
     }
-        return(
-          <tbody key={index}>
-                    <tr>
-                      <th scope="row">{index+1}</th>
-                      <td><a href={url}>{asset.AName}</a></td>
-                      <td>{asset.creator}</td>
-                      <td>{asset.owner}</td>
-                      <td>{date}</td>
-                      {transfer}
-                    </tr>
-                  </tbody>
-        )
-      });
+    asts = (<tbody key={i}>
+      <tr>
+        <th scope="row">{i+1}</th>
+        <td><a href={"/trackAsset/"+this.state.assetList[i].AID}>{this.state.assetList[i].AName}</a></td>
+        <td>{creator}</td>
+        <td>{owner}</td>
+        <td>{date}</td>
+        {transfer}
+      </tr>
+    </tbody>);
+    assets.push(asts)
+      }
+    } else {
+      message = <Typography type="display-4">No assets created or owned!</Typography>
+
     }
 
     return (
