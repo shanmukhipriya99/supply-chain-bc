@@ -7,6 +7,12 @@ const auth = require("../middleware/auth");
 const { response } = require("express");
 const router = new express.Router();
 
+router.get("/getAID", auth, (req, res) => {
+  return  res
+  .status(201)
+  .send({ success: true, id:  uniqid("A-")});
+})
+
 router.post("/createAsset", auth, (req, res) => {
   const token = req.header("Authorization").replace("Bearer ", "");
   let pid = "SELECT * FROM parties WHERE ??=?";
@@ -46,12 +52,20 @@ router.get("/getAssets", auth, (req, res) => {
     }
     if (result != 0) {
       let assets = "SELECT * FROM assets WHERE ??=?";
-      connection.query(assets, ["creator", result[0].PID], (err, rows) => {
+      let creators = [];
+      let owners = [];
+      connection.query(assets, ["creator", result[0].PID], async (err, rows) => {
         if (err) {
           return res.status(500).json({ error: err });
         }
         if (rows != 0) {
-          return res.status(200).send({ success: true, Assets: rows });
+          for(let i=0; i<rows.length; i++){
+            await getDetails(rows[i].creator, rows[i].owner).then(result => {
+              creators.push(result.sender);
+              owners.push(result.receiver);
+            })
+          }
+          return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
         }
       });
     } else {
@@ -255,11 +269,10 @@ function getTxns(sender, receiver) {
   });
 }
 
-function getDetails(aid, sender, receiver) {
+function getDetails(sender, receiver) {
   let party = {
     sender: null,
-    receiver: null,
-    AName: null,
+    receiver: null
   };
   return new Promise((resolve, reject) => {
     let query = "SELECT email FROM parties WHERE ??=?";
