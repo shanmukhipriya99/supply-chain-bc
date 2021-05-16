@@ -3,9 +3,6 @@ import Page from 'components/Page';
 import React, {Component} from 'react';
 import { Card, CardBody, CardHeader, Col, Row, Table } from 'reactstrap';
 import Typography from 'components/Typography';
-
-const tableTypes = ['', 'bordered', 'striped', 'hover'];
-
 class Transactions extends Component {
 
   state = {
@@ -52,7 +49,7 @@ class Transactions extends Component {
                         </tbody>
               )
               transactions.push(txns);
-              console.log(this.state.senders[i],  localStorage.getItem("email"));
+              // console.log(this.state.senders[i],  localStorage.getItem("email"));
       }
     }
     return (

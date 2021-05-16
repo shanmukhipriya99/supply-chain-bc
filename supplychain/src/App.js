@@ -17,6 +17,7 @@ const CardPage = React.lazy(() => import('pages/CardPage'));
 const ChartPage = React.lazy(() => import('pages/ChartPage'));
 const DashboardPage = React.lazy(() => import('pages/DashboardPage'));
 const AddAsset = React.lazy(() => import('pages/addAsset'));
+const AddTxn = React.lazy(() => import('pages/addTxn'));
 const DropdownPage = React.lazy(() => import('pages/DropdownPage'));
 const FormPage = React.lazy(() => import('pages/FormPage'));
 const InputGroupPage = React.lazy(() => import('pages/InputGroupPage'));
@@ -58,6 +59,7 @@ class App extends React.Component {
               
                 <Route exact path="/dashboard" component={DashboardPage} />
                 <Route exact path="/addAsset" component={AddAsset} />
+                <Route exact path="/transferAsset/:id" component={AddTxn} />
                 <Route exact path="/buttons" component={ButtonPage} />
                 <Route exact path="/cards" component={CardPage} />
                 <Route exact path="/widgets" component={WidgetPage} />
