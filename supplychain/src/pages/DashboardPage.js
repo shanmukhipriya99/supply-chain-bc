@@ -34,7 +34,7 @@ class DashboardPage extends React.Component {
       }
     });
     axios.get("/getAssets").then(response => {
-      // console.log(response.data.Assets);
+      console.log(response.data.Assets);
       this.setState({ assetList: response.data.Assets, creators: response.data.creators, owners: response.data.owners})
     }).catch(err => {
       if (err.response.status === 500) {
@@ -54,7 +54,6 @@ class DashboardPage extends React.Component {
     let card = null;
     let assets = [];
     let message = '';
-    let url="/transferAsset/";
     if(this.state.role === "Farmer") {
       card = (<Card body inverse color="secondary">
       <CardTitle tag="h5">Add an Asset</CardTitle>
@@ -63,6 +62,8 @@ class DashboardPage extends React.Component {
         Add
       </Button>
     </Card>);
+    } else if(this.state.role === "Customer") {
+      this.props.history.push("/dropdowns");
     }
     if(this.state.assetList.length != 0) {
       let transfer = 'Cannot transfer!';
@@ -72,7 +73,7 @@ class DashboardPage extends React.Component {
         let owner = this.state.owners[i];
         let creator = this.state.creators[i];
         let url = "/transferAsset/"+this.state.assetList[i].AID;
-        if(owner === creator) {
+        if(owner === localStorage.getItem("email")) {
           transfer = (<td>
             <a href={url}>Transfer</a> 
           </td>);
@@ -123,6 +124,7 @@ class DashboardPage extends React.Component {
             <th>Action</th>
           </tr>
         </thead>
+          {message}
           {assets}
       </Table>
       <p>Total Assets: {this.state.assetList.length}</p>
