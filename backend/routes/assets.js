@@ -8,10 +8,8 @@ const { response } = require("express");
 const router = new express.Router();
 
 router.get("/getAID", auth, (req, res) => {
-  return  res
-  .status(201)
-  .send({ success: true, id:  uniqid("A-")});
-})
+  return res.status(201).send({ success: true, id: uniqid("A-") });
+});
 
 router.post("/createAsset", auth, (req, res) => {
   const token = req.header("Authorization").replace("Bearer ", "");
@@ -54,20 +52,31 @@ router.get("/getAssets", auth, (req, res) => {
       let assets = "SELECT * FROM assets WHERE ??=? OR ??=?";
       let creators = [];
       let owners = [];
-      connection.query(assets, ["creator", result[0].PID, "owner", result[0].PID], async (err, rows) => {
-        if (err) {
-          return res.status(500).json({ error: err });
-        }
-        if (rows != 0) {
-          for(let i=0; i<rows.length; i++){
-            await getDetails(rows[i].creator, rows[i].owner).then(result => {
-              creators.push(result.sender);
-              owners.push(result.receiver);
-            })
+      connection.query(
+        assets,
+        ["creator", result[0].PID, "owner", result[0].PID],
+        async (err, rows) => {
+          if (err) {
+            return res.status(500).json({ error: err });
           }
-          return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
+          if (rows != 0) {
+            for (let i = 0; i < rows.length; i++) {
+              await getDetails(rows[i].creator, rows[i].owner).then(
+                (result) => {
+                  creators.push(result.sender);
+                  owners.push(result.receiver);
+                }
+              );
+            }
+            return res.status(200).send({
+              success: true,
+              Assets: rows,
+              creators: creators,
+              owners: owners,
+            });
+          }
         }
-      });
+      );
     } else {
       return res.status(401).send({ success: false, message: "Unauthorized" });
     }
@@ -198,37 +207,37 @@ router.get("/trackAsset/:id", auth, (req, res) => {
       return res.status(500).json({ error: err });
     }
     if (result != 0) {
-      getAssetTxns(req.params.id).then(async (result) => {
-        // console.log(result);
-        if (result.length != 0) {
-          for (let i = 0; i < result.length; i++) {
-            time.push(result[i].time);
-            await getDetails(
-              result[i].Sender,
-              result[i].Receiver
-            ).then(async (party) => {
-              sender.push(party.sender);
-              receiver.push(party.receiver);
-              // console.log("S"+ sender + "R" + receiver);
-              await getAName(req.params.id).then((aname) => {
-                assetName.push(aname);
-                // console.log(assetName);
-              });
-            });
+      getAssetTxns(req.params.id)
+        .then(async (result) => {
+          // console.log(result);
+          if (result.length != 0) {
+            for (let i = 0; i < result.length; i++) {
+              time.push(result[i].time);
+              await getDetails(result[i].Sender, result[i].Receiver).then(
+                async (party) => {
+                  sender.push(party.sender);
+                  receiver.push(party.receiver);
+                  // console.log("S"+ sender + "R" + receiver);
+                  await getAName(req.params.id).then((aname) => {
+                    assetName.push(aname);
+                    // console.log(assetName);
+                  });
+                }
+              );
+            }
           }
-        }
-        // console.log("S"+sender+" R"+receiver+" A"+assetName );
-      return res.status(200).send({
-        success: true,
-        Senders: sender,
-        Receivers: receiver,
-        ANames: assetName,
-        Time: time,
-      });
-    })
-    .catch((err) => {
-      return res.status(500).json({ error: err });
-    });
+          // console.log("S"+sender+" R"+receiver+" A"+assetName );
+          return res.status(200).send({
+            success: true,
+            Senders: sender,
+            Receivers: receiver,
+            ANames: assetName,
+            Time: time,
+          });
+        })
+        .catch((err) => {
+          return res.status(500).json({ error: err });
+        });
 
       // return res.status(200).send({ success: true, AssetTxns: rows });
     } else {
@@ -245,29 +254,48 @@ router.get("/allAssets", auth, (req, res) => {
       return res.status(500).json({ error: err });
     }
     if (result != 0) {
-      let assets = "SELECT * FROM assets";
+      let roles = "SELECT PID FROM parties WHERE ??!=?";
+      let pids = [];
       let creators = [];
       let owners = [];
-      connection.query(assets, async (err, rows) => {
+      connection.query(roles, ["role", "Customer"], (err, row) => {
         if (err) {
           return res.status(500).json({ error: err });
         }
-        if (rows != 0) {
-          for(let i=0; i<rows.length; i++){
-            await getDetails(rows[i].creator, rows[i].owner).then(result => {
-              creators.push(result.sender);
-              owners.push(result.receiver);
-            })
-          }
-          return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
+        for (let i = 0; i < row.length; i++) {
+          pids.push(row[i].PID);
         }
+        let arr = [];
+        let str = "";
+        pids.map((pid, index) => {   //converting each pid into a string and then pushing into arr
+          str = `'${pid}'`;
+          arr.push(str);
+        });
+        // console.log(arr.join());
+        let assets =
+          "SELECT * FROM assets WHERE owner IN (" + arr.join() + ")";
+        // return res.status(200).send({ success: true, Assets: pids });
+        connection.query(assets, async (err, rows) => {
+          if (err) {
+            return res.status(500).json({ error: err });
+          }
+          if (rows != 0) {
+            for(let i=0; i<rows.length; i++){
+              await getDetails(rows[i].creator, rows[i].owner).then(result => {
+                creators.push(result.sender);
+                owners.push(result.receiver);
+              })
+            }
+            return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
+          // return res.status(200).send({ success: true, Assets: rows });
+          }
+        });
       });
     } else {
       return res.status(401).send({ success: false, message: "Unauthorized" });
     }
   });
 });
-
 
 function getPID(email) {
   return new Promise((resolve, reject) => {
@@ -302,7 +330,7 @@ function getTxns(sender, receiver) {
 function getDetails(sender, receiver) {
   let party = {
     sender: null,
-    receiver: null
+    receiver: null,
   };
   return new Promise((resolve, reject) => {
     let query = "SELECT email FROM parties WHERE ??=?";
