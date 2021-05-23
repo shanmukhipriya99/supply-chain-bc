@@ -49,7 +49,7 @@ router.get("/getAssets", auth, (req, res) => {
       return res.status(500).json({ error: err });
     }
     if (result != 0) {
-      let assets = "SELECT * FROM assets WHERE ??=? OR ??=?";
+      let assets = "SELECT * FROM assets WHERE ??=? OR ??=? ORDER BY time DESC";
       let creators = [];
       let owners = [];
       connection.query(
@@ -267,29 +267,60 @@ router.get("/allAssets", auth, (req, res) => {
         }
         let arr = [];
         let str = "";
-        pids.map((pid, index) => {   //converting each pid into a string and then pushing into arr
+        pids.map((pid, index) => {
+          //converting each pid into a string and then pushing into arr
           str = `'${pid}'`;
           arr.push(str);
         });
         // console.log(arr.join());
-        let assets =
-          "SELECT * FROM assets WHERE owner IN (" + arr.join() + ")";
+        let assets = "SELECT * FROM assets WHERE owner IN (" + arr.join() + ")";
         // return res.status(200).send({ success: true, Assets: pids });
         connection.query(assets, async (err, rows) => {
           if (err) {
             return res.status(500).json({ error: err });
           }
           if (rows != 0) {
-            for(let i=0; i<rows.length; i++){
-              await getDetails(rows[i].creator, rows[i].owner).then(result => {
-                creators.push(result.sender);
-                owners.push(result.receiver);
-              })
+            for (let i = 0; i < rows.length; i++) {
+              await getDetails(rows[i].creator, rows[i].owner).then(
+                (result) => {
+                  creators.push(result.sender);
+                  owners.push(result.receiver);
+                }
+              );
             }
-            return res.status(200).send({ success: true, Assets: rows, creators: creators, owners: owners });
-          // return res.status(200).send({ success: true, Assets: rows });
+            return res
+              .status(200)
+              .send({
+                success: true,
+                Assets: rows,
+                creators: creators,
+                owners: owners,
+              });
+            // return res.status(200).send({ success: true, Assets: rows });
           }
         });
+      });
+    } else {
+      return res.status(401).send({ success: false, message: "Unauthorized" });
+    }
+  });
+});
+
+router.post("/receiverPID", auth, (req, res) => {
+  const token = req.header("Authorization").replace("Bearer ", "");
+  let pid = "SELECT * FROM parties WHERE ??=?";
+  // console.log(req.body);
+  connection.query(pid, ["token", token], (err, result) => {
+    if (err) {
+      return res.status(500).json({ error: err });
+    }
+    if (result != 0) {
+      getPID(req.body.Receiver).then((row) => {
+        return res.status(200).send({
+          success: true,
+          PID: row[0].PID,
+        });
+        // console.log(row);
       });
     } else {
       return res.status(401).send({ success: false, message: "Unauthorized" });
