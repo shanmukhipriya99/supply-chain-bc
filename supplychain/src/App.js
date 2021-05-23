@@ -8,25 +8,13 @@ import componentQueries from 'react-component-queries';
 import { BrowserRouter, Redirect, Route, Switch } from 'react-router-dom';
 import './styles/reduction.scss';
 
-const AlertPage = React.lazy(() => import('pages/AlertPage'));
-const AuthModalPage = React.lazy(() => import('pages/AuthModalPage'));
-const BadgePage = React.lazy(() => import('pages/BadgePage'));
-const ButtonGroupPage = React.lazy(() => import('pages/ButtonGroupPage'));
-const ButtonPage = React.lazy(() => import('pages/ButtonPage'));
-const CardPage = React.lazy(() => import('pages/CardPage'));
-const ChartPage = React.lazy(() => import('pages/ChartPage'));
 const DashboardPage = React.lazy(() => import('pages/DashboardPage'));
 const AddAsset = React.lazy(() => import('pages/addAsset'));
 const AddTxn = React.lazy(() => import('pages/addTxn'));
 const CustDashboard = React.lazy(() => import('pages/CustDashboard'));
-const FormPage = React.lazy(() => import('pages/FormPage'));
-const InputGroupPage = React.lazy(() => import('pages/InputGroupPage'));
-const ModalPage = React.lazy(() => import('pages/ModalPage'));
 const CustAssets = React.lazy(() => import('pages/CustAssets'));
 const Transactions = React.lazy(() => import('pages/Transactions'));
 const TrackAsset = React.lazy(() => import('pages/TrackAsset'));
-const TypographyPage = React.lazy(() => import('pages/TypographyPage'));
-const WidgetPage = React.lazy(() => import('pages/WidgetPage'));
 
 const getBasename = () => {
   return `/${process.env.PUBLIC_URL.split('/').pop()}`;
@@ -57,29 +45,13 @@ class App extends React.Component {
 
             <MainLayout breakpoint={this.props.breakpoint}>
               <React.Suspense fallback={<PageSpinner />}>
-              
                 <Route exact path="/dashboard" component={DashboardPage} />
                 <Route exact path="/addAsset" component={AddAsset} />
                 <Route exact path="/transferAsset/:id" component={AddTxn} />
-                <Route exact path="/buttons" component={ButtonPage} />
-                <Route exact path="/cards" component={CardPage} />
-                <Route exact path="/widgets" component={WidgetPage} />
-                <Route exact path="/typography" component={TypographyPage} />
-                <Route exact path="/alerts" component={AlertPage} />
                 <Route exact path="/txns" component={Transactions} />
                 <Route exact path="/trackAsset/:id" component={TrackAsset} />
-                <Route exact path="/badges" component={BadgePage} />
-                <Route
-                  exact
-                  path="/button-groups"
-                  component={ButtonGroupPage}
-                />
                 <Route exact path="/dropdowns" component={CustDashboard} />
                 <Route exact path="/progress" component={CustAssets} />
-                <Route exact path="/modals" component={ModalPage} />
-                <Route exact path="/forms" component={FormPage} />
-                <Route exact path="/input-groups" component={InputGroupPage} />
-                <Route exact path="/charts" component={ChartPage} />
               </React.Suspense>
               
             </MainLayout>
