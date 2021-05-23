@@ -1,7 +1,7 @@
 import Web3 from "web3"; //Web3 is a constructor function
 
 let web3;
-
+window.ethereum.enable();   //Very IMP!
 if (typeof window !== "undefined" && typeof window.web3 !== "undefined") {
   // in the browser and metamask is running
   web3 = new Web3(window.web3.currentProvider);
